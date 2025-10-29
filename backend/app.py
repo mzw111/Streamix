@@ -3,12 +3,13 @@ from flask_cors import CORS
 import mysql.connector
 import os 
 from routes.user_auth import user_bp
-
+from routes.profile import profile_bp
 
 app = Flask(__name__)
 CORS(app)  
 
 app.register_blueprint(user_bp, url_prefix="/api/user")
+app.register_blueprint(profile_bp, url_prefix="/api/profile") 
 
 if __name__ == '__main__':
     
