@@ -26,14 +26,15 @@ def signup():
     if existing_user:
         return jsonify({"success": False, "message": "User already exists!"}), 400
 
+    # Hash the password before storing
     hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
-
-    query = "INSERT INTO user (Name, DOB, Country, Email) VALUES (%s, %s, %s, %s)"
-    execute_query(query, (name, dob, country, email))
-
-  
-    execute_query("UPDATE user SET Password = %s WHERE Email = %s", (hashed_pw, email))
+    # Insert all user data including password in a single query
+    query = """
+        INSERT INTO user (Name, DOB, Country, Email, Password)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    execute_query(query, (name, dob, country, email, hashed_pw))
 
     return jsonify({"success": True, "message": "User registered successfully!"})
 
