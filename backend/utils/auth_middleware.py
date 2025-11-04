@@ -3,7 +3,7 @@ from flask import request, jsonify
 import jwt
 import os
 
-# Use the same secret you used to encode JWT in user_auth.py
+# Use the same secret as in user_auth.py
 SECRET_KEY = os.getenv("JWT_SECRET", "your_secret_key")
 
 def token_required(f):

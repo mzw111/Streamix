@@ -25,51 +25,62 @@ except mysql.connector.Error as err:
     connection_pool = None
 
 
+# Function to get a connection from the pool
 def get_connection():
-    """Get a connection from the pool."""
     if connection_pool:
         return connection_pool.get_connection()
     else:
         raise ConnectionError("Database connection pool is not initialized.")
 
 
+# Backwards-compatible name used in some routes
 def get_db_connection():
-    """Backwards compatibility alias."""
     return get_connection()
 
 
+# Utility function for executing SELECT queries
 def fetch_all(query, params=None):
-    """Run SELECT queries safely and return list of dicts."""
-    try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(query, params or ())
-        results = cursor.fetchall()
-        return results
-    except mysql.connector.Error as err:
-        print(f"❌ DB fetch error: {err}")
-        return []
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(query, params or ())
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return results
+
+
+# Alias used by some existing code
+def fetch_query(query, params=None):
+    return fetch_all(query, params)
+
+
+def fetch_one(query, params=None):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(query, params or ())
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return row
+
 
 
 def execute_query(query, params=None):
-    """Run INSERT/UPDATE/DELETE safely."""
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, params or ())
-        conn.commit()
-        return True
-    except mysql.connector.Error as err:
-        print(f" DB execution error: {err}")
-        return False
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, params or ())
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
 
 
-def fetch_query(query, params=None):
-    """Alias for fetch_all for consistent naming."""
-    return fetch_all(query, params)
+def call_procedure(proc_name, params=()):
+    """Call a stored procedure without returning a result set."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.callproc(proc_name, params)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True

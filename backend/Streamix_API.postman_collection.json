@@ -1,0 +1,213 @@
+{
+  "info": {
+    "name": "Streamix API",
+    "description": "Complete API collection for Streamix streaming platform backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{base_url}}/user/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"dob\": \"1990-01-01\",\n  \"country\": \"USA\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{base_url}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/user/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Get All Movies",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/movies/"
+          }
+        },
+        {
+          "name": "Get Movie by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/movies/1"
+          }
+        },
+        {
+          "name": "Get Movies by Genre",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/movies/genre/Action"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profiles",
+      "item": [
+        {
+          "name": "Create Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{base_url}}/profile/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Profile\",\n  \"picture\": \"avatar1.png\",\n  \"language\": \"English\",\n  \"age_restriction\": \"All\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Profiles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{base_url}}/profile/list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Watchlist",
+      "item": [
+        {
+          "name": "Add to Watchlist (Stored Procedure)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{base_url}}/watchlist/add",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profile_id\": 1,\n  \"content_type\": \"Movie\",\n  \"content_id\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Watchlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{base_url}}/watchlist/all/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ratings",
+      "item": [
+        {
+          "name": "Add Rating (Triggers Avg Update)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{base_url}}/ratings/add",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profile_id\": 1,\n  \"content_type\": \"Movie\",\n  \"content_id\": 1,\n  \"rating\": 9,\n  \"review_text\": \"Amazing movie!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Ratings for Content",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/ratings/content/Movie/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get Subscription Status (SQL Function)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{base_url}}/subscriptions/status"
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": "{{base_url}}/subscriptions/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_date\": \"2024-11-01\",\n  \"end_date\": \"2024-12-01\",\n  \"auto_renewal\": true,\n  \"payment_status\": \"Active\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

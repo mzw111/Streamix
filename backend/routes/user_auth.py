@@ -4,11 +4,12 @@ from db import fetch_all, execute_query
 import bcrypt
 import jwt
 import datetime
+import os
 
 user_bp = Blueprint('user', __name__)
 
 
-SECRET_KEY = "supersecretkey123"  
+SECRET_KEY = os.getenv("JWT_SECRET", "your_secret_key")  
 
 
 
@@ -26,15 +27,14 @@ def signup():
     if existing_user:
         return jsonify({"success": False, "message": "User already exists!"}), 400
 
-    # Hash the password before storing
-    hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-    # Insert all user data including password in a single query
-    query = """
-        INSERT INTO user (Name, DOB, Country, Email, Password)
-        VALUES (%s, %s, %s, %s, %s)
-    """
-    execute_query(query, (name, dob, country, email, hashed_pw))
+
+    query = "INSERT INTO user (Name, DOB, Country, Email) VALUES (%s, %s, %s, %s)"
+    execute_query(query, (name, dob, country, email))
+
+  
+    execute_query("UPDATE user SET Password = %s WHERE Email = %s", (hashed_pw, email))
 
     return jsonify({"success": True, "message": "User registered successfully!"})
 
