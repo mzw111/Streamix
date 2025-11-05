@@ -57,9 +57,41 @@
   cursor: pointer;
   transition: all 0.3s ease;
   animation: fadeIn 0.5s ease-out;
+  position: relative;
 }
 
 .profile-card:hover {
+  transform: scale(1.1);
+}
+
+.profile-card.manage-mode {
+  cursor: default;
+}
+
+.profile-card.manage-mode:hover {
+  transform: scale(1.05);
+}
+
+.delete-profile-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.delete-profile-btn:hover {
+  background: #dc2626;
   transform: scale(1.1);
 }
 
@@ -204,6 +236,23 @@
 
 .modal-actions .btn {
   padding: 0.75rem 1.5rem;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
 }
 
 /* Responsive Design */

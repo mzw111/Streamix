@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiPlus, FiEdit2, FiUser } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiUser, FiTrash2 } from 'react-icons/fi';
 import { profileAPI } from '../services/api';
 import './Profiles.css';
 
@@ -12,6 +12,8 @@ const Profiles = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
   const [creating, setCreating] = useState(false);
+  const [manageMode, setManageMode] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   useEffect(() => {
     fetchProfiles();
@@ -68,6 +70,17 @@ const Profiles = () => {
     }
   };
 
+  const handleDeleteProfile = async (profileId) => {
+    try {
+      await profileAPI.delete(profileId);
+      setProfiles(profiles.filter(p => p.profile_id !== profileId));
+      setDeleteConfirm(null);
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete profile');
+    }
+  };
+
   if (loading) {
     return (
       <div className="profiles-page">
@@ -91,17 +104,28 @@ const Profiles = () => {
           {profiles.map((profile) => (
             <div 
               key={profile.profile_id}
-              className="profile-card"
-              onClick={() => handleSelectProfile(profile)}
+              className={`profile-card ${manageMode ? 'manage-mode' : ''}`}
+              onClick={() => !manageMode && handleSelectProfile(profile)}
             >
               <div className="profile-avatar">
                 <FiUser />
               </div>
               <p className="profile-name">{profile.name}</p>
+              {manageMode && (
+                <button
+                  className="delete-profile-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteConfirm(profile.profile_id);
+                  }}
+                >
+                  <FiTrash2 />
+                </button>
+              )}
             </div>
           ))}
           
-          {profiles.length < 5 && (
+          {profiles.length < 5 && !manageMode && (
             <div 
               className="profile-card add-profile"
               onClick={() => setShowCreateModal(true)}
@@ -114,8 +138,11 @@ const Profiles = () => {
           )}
         </div>
         
-        <button className="btn btn-secondary manage-profiles-btn">
-          <FiEdit2 /> Manage Profiles
+        <button 
+          className="btn btn-secondary manage-profiles-btn"
+          onClick={() => setManageMode(!manageMode)}
+        >
+          <FiEdit2 /> {manageMode ? 'Done' : 'Manage Profiles'}
         </button>
       </div>
       
@@ -156,6 +183,29 @@ const Profiles = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Delete Profile?</h2>
+            <p>This will permanently delete this profile and all its data.</p>
+            <div className="modal-actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setDeleteConfirm(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-danger"
+                onClick={() => handleDeleteProfile(deleteConfirm)}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

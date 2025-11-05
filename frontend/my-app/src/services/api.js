@@ -108,6 +108,8 @@ export const viewingHistoryAPI = {
 
 // Subscriptions APIs
 export const subscriptionsAPI = {
+  getPlans: () => api.get('/subscriptions/plans'),
+  subscribe: (data) => api.post('/subscriptions/subscribe', data),
   create: (data) => api.post('/subscriptions/create', data),
   list: () => api.get('/subscriptions/list'),
   getStatus: () => api.get('/subscriptions/status'),

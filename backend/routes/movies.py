@@ -3,7 +3,7 @@ from db import fetch_all, fetch_one
 
 movies_bp = Blueprint("movies", __name__)
 
-# Map movie titles to their actual TMDB poster URLs
+
 MOVIE_POSTERS = {
     "The Dark Knight": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
     "Inception": "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
@@ -49,7 +49,21 @@ def transform_movie(movie):
 @movies_bp.route("/", methods=["GET"])
 def get_all_movies():
     movies = fetch_all("SELECT * FROM movie")
-    transformed_movies = [transform_movie(m) for m in movies]
+    transformed_movies = []
+    
+    for m in movies:
+        movie = transform_movie(m)
+        if movie:
+            # Fetch genres for this movie
+            genres = fetch_all("""
+                SELECT g.Genre_Id, g.Genre_Name 
+                FROM genre g
+                JOIN movie_genre mg ON g.Genre_Id = mg.Genre_Id
+                WHERE mg.Movie_Id = %s
+            """, (movie['movie_id'],))
+            movie['genres'] = [{'genre_id': g['Genre_Id'], 'name': g['Genre_Name']} for g in genres]
+            transformed_movies.append(movie)
+    
     return jsonify({"success": True, "movies": transformed_movies})
 
 @movies_bp.route("/<int:movie_id>", methods=["GET"])

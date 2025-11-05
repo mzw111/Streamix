@@ -12,6 +12,8 @@ import Profiles from './pages/Profiles';
 import Movies from './pages/Movies';
 import TVShows from './pages/TVShows';
 import Watchlist from './pages/Watchlist';
+import Subscription from './pages/Subscription';
+import ViewingHistory from './pages/ViewingHistory';
 
 import './App.css';
 
@@ -54,6 +56,8 @@ function MainLayout() {
         <Route path="/movies" element={<Movies />} />
         <Route path="/tv-shows" element={<TVShows />} />
         <Route path="/my-list" element={<Watchlist />} />
+        <Route path="/history" element={<ViewingHistory />} />
+        <Route path="/subscription" element={<Subscription />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

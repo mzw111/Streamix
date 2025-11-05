@@ -36,6 +36,8 @@ const Navbar = () => {
             <Link to="/movies" className="nav-link">Movies</Link>
             <Link to="/tv-shows" className="nav-link">TV Shows</Link>
             <Link to="/my-list" className="nav-link">My List</Link>
+            <Link to="/history" className="nav-link">History</Link>
+            <Link to="/subscription" className="nav-link">Subscription</Link>
           </div>
         </div>
 
@@ -75,10 +77,13 @@ const Navbar = () => {
                     <Link to="/profiles" className="dropdown-item">
                       Manage Profiles
                     </Link>
+                    <Link to="/history" className="dropdown-item">
+                      Viewing History
+                    </Link>
                     <Link to="/account" className="dropdown-item">
                       Account Settings
                     </Link>
-                    <Link to="/subscriptions" className="dropdown-item">
+                    <Link to="/subscription" className="dropdown-item">
                       Subscription
                     </Link>
                     <div className="dropdown-divider"></div>

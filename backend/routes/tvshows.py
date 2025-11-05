@@ -46,7 +46,21 @@ def transform_tvshow(show):
 @tvshows_bp.route("/", methods=["GET"])
 def get_all_tvshows():
     shows = fetch_all("SELECT * FROM tv_show")
-    transformed_shows = [transform_tvshow(s) for s in shows]
+    transformed_shows = []
+    
+    for s in shows:
+        show = transform_tvshow(s)
+        if show:
+            # Fetch genres for this TV show
+            genres = fetch_all("""
+                SELECT g.Genre_Id, g.Genre_Name 
+                FROM genre g
+                JOIN tvshow_genre tg ON g.Genre_Id = tg.Genre_Id
+                WHERE tg.Show_Id = %s
+            """, (show['tv_show_id'],))
+            show['genres'] = [{'genre_id': g['Genre_Id'], 'name': g['Genre_Name']} for g in genres]
+            transformed_shows.append(show)
+    
     return jsonify({"success": True, "tv_shows": transformed_shows})
 
 
