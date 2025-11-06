@@ -64,15 +64,18 @@ const MovieCard = ({ content, type = 'Movie', profileId }) => {
     // Log viewing history when clicking on content
     if (profileId && contentId) {
       try {
-        await viewingHistoryAPI.log({
+        const historyData = {
           profile_id: parseInt(profileId),
           content_type: type === 'TV_Show' ? 'TV_Show' : 'Movie',
           content_id: parseInt(contentId),
-          watch_duration: 0 // Default to 0, can be updated later if needed
-        });
-        console.log('Viewing history logged');
+          watch_duration: 120 // Set to 120 minutes as default watch duration
+        };
+        console.log('Logging viewing history:', historyData);
+        const response = await viewingHistoryAPI.log(historyData);
+        console.log('✅ Viewing history logged successfully:', response.data);
       } catch (error) {
-        console.error('Failed to log viewing history:', error);
+        console.error('❌ Failed to log viewing history:', error);
+        console.error('Error response:', error.response?.data);
         // Don't block navigation if logging fails
       }
     }

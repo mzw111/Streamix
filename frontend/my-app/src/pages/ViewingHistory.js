@@ -17,10 +17,18 @@ const ViewingHistory = () => {
       try {
         setLoading(true);
         const response = await viewingHistoryAPI.getByProfile(profileId);
-        console.log('History response:', response.data);
+        console.log('Full history response:', response);
+        console.log('History response data:', response.data);
         
         // Handle both possible response structures
-        const historyData = response.data.history || response.data.viewing_history || [];
+        let historyData = [];
+        if (response.data.success) {
+          historyData = response.data.history || response.data.viewing_history || [];
+        } else {
+          historyData = response.data.history || response.data.viewing_history || response.data || [];
+        }
+        
+        console.log('Extracted history data:', historyData);
         
         // Ensure it's an array
         if (Array.isArray(historyData)) {
