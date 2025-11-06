@@ -7,7 +7,7 @@ genres_bp = Blueprint('genres', __name__)
 @genres_bp.route('/', methods=['GET'])
 def get_all_genres():
     genres = fetch_all("SELECT * FROM genre ORDER BY Genre_Name")
-    # Transform to consistent format
+    
     transformed_genres = [
         {
             'genre_id': g['Genre_Id'],
