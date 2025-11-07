@@ -1,4 +1,4 @@
-# 🎬 Streamix - Streaming Platform# 🎬 Streamix - Streaming Platform
+# 🎬 Streamix - Streaming Platform
 
 
 
@@ -10,29 +10,28 @@ A full-stack Netflix-like streaming platform built with React, Flask, and MySQL 
 
 
 
-## 📋 Table of Contents## 📋 Table of Contents
+## 📋 Table of Contents
 
 
 
-- [Project Overview](#project-overview)- [Project Overview](#project-overview)
+- [Project Overview](#project-overview)
 
-- [Architecture](#architecture)- [Architecture](#architecture)
+- [Architecture](#architecture)
 
-- [Features](#features)- [Features](#features)
+- [Features](#features)
 
-- [Technology Stack](#technology-stack)- [Technology Stack](#technology-stack)
+- [Technology Stack](#technology-stack)
 
-- [Database Schema](#database-schema)- [Database Schema](#database-schema)
+- [Database Schema](#database-schema)
 
-- [Setup & Installation](#setup--installation)- [Setup & Installation](#setup--installation)
+- [Setup & Installation](#setup--installation)
+- [Running the Application](#running-the-application)
 
-- [Running the Application](#running-the-application)- [Running the Application](#running-the-application)
+- [API Documentation](#api-documentation)
 
-- [API Documentation](#api-documentation)- [API Documentation](#api-documentation)
+- [Database Objects](#database-objects)
 
-- [Database Objects](#database-objects)- [Database Objects](#database-objects)
-
-- [Project Structure](#project-structure)- [Project Structure](#project-structure)
+- [Project Structure](#project-structure)
 
 
 
@@ -40,7 +39,7 @@ A full-stack Netflix-like streaming platform built with React, Flask, and MySQL 
 
 
 
-## 🎯 Project Overview## 🎯 Project Overview
+## 🎯 Project Overview
 
 
 
@@ -48,8 +47,8 @@ Streamix is a comprehensive streaming platform that allows users to:Streamix is 
 
 - Browse and search movies and TV shows by genre- Browse and search movies and TV shows by genre
 
-- Create multiple profiles per account (with a 3-profile limit enforced by database trigger)- Create multiple profiles per account (with a 3-profile limit enforced by database trigger)
-
+- Create multiple profiles per account (with a 3-profile limit enforced by database trigger)
+  
 - Manage personal watchlists- Manage personal watchlists
 
 - Track viewing history automatically- Track viewing history automatically
@@ -66,11 +65,11 @@ Streamix is a comprehensive streaming platform that allows users to:Streamix is 
 
 
 
-## 🏗️ Architecture## 🏗️ Architecture
+## 🏗️ Architecture
 
 
 
-### System Architecture### System Architecture
+### System Architecture
 
 
 
@@ -96,11 +95,52 @@ Streamix is a comprehensive streaming platform that allows users to:Streamix is 
 
 
 
-1. **Frontend (React)**: User interface for browsing content, managing profiles, and interacting with features1. **Frontend (React)**: User interface for browsing content, managing profiles, and interacting with features
+1. **Frontend (React)**: User interface for browsing content, managing profiles, and interacting with features. 
 
-2. **Backend (Flask)**: REST API handling business logic, authentication, and database operations2. **Backend (Flask)**: REST API handling business logic, authentication, and database operations
+2. **Backend (Flask)**: REST API handling business logic, authentication, and database operations.
 
-3. **Database (MySQL)**: Stores all application data with enforced relationships and constraints3. **Database (MySQL)**: Stores all application data with enforced relationships and constraints
+3. **Database (MySQL)**: Stores all application data with enforced relationships and constraints
+
+
+------
+
+
+
+## ✨ Features
+
+
+
+### User Management
+
+- **Authentication**: Secure login/signup with JWT tokens
+  
+- **Profiles**: Multiple profiles per user (max 3, enforced by trigger)
+
+- **Subscriptions**: Basic, Standard, and Premium plans
+
+
+
+### Content Features
+
+- **Browse**: Movies and TV shows with genre filtering
+
+- **Search**: Filter content by genre with dropdown
+
+- **Watchlist**: Add/remove content to personal watchlist
+
+- **Ratings**: Rate and review movies/shows
+
+- **Viewing History**: Automatic tracking when clicking content
+
+
+
+### Database Features
+
+- **Stored Procedures**: `sp_AddToWatchlist`, `sp_GetWatchHistory`, `sp_ProcessPayment`
+
+- **Functions**: `fn_GetSubscriptionStatus`, `fn_GetTotalWatchTime`
+  
+- **Triggers**: `trg_CheckProfileLimit` (prevents >3 profiles per user)
 
 
 
@@ -108,87 +148,45 @@ Streamix is a comprehensive streaming platform that allows users to:Streamix is 
 
 
 
-## ✨ Features## ✨ Features
+## 🛠️ Technology Stack
 
 
 
-### User Management### User Management
+### Frontend
 
-- **Authentication**: Secure login/signup with JWT tokens- **Authentication**: Secure login/signup with JWT tokens
+- **React** 19.2.0 - UI library
 
-- **Profiles**: Multiple profiles per user (max 3, enforced by trigger)- **Profiles**: Multiple profiles per user (max 3, enforced by trigger)
+- **React Router** 7.0.2 - Navigation
+  
+- **Axios** 1.6.2 - HTTP client
 
-- **Subscriptions**: Basic, Standard, and Premium plans- **Subscriptions**: Basic, Standard, and Premium plans
+- **React Icons** 5.4.0 - Icon components
 
-
-
-### Content Features### Content Features
-
-- **Browse**: Movies and TV shows with genre filtering- **Browse**: Movies and TV shows with genre filtering
-
-- **Search**: Filter content by genre with dropdown- **Search**: Filter content by genre with dropdown
-
-- **Watchlist**: Add/remove content to personal watchlist- **Watchlist**: Add/remove content to personal watchlist
-
-- **Ratings**: Rate and review movies/shows- **Ratings**: Rate and review movies/shows
-
-- **Viewing History**: Automatic tracking when clicking content- **Viewing History**: Automatic tracking when clicking content
+- **CSS3** - Styling
 
 
 
-### Database Features### Database Features
+### Backend
 
-- **Stored Procedures**: `sp_AddToWatchlist`, `sp_GetWatchHistory`, `sp_ProcessPayment`- **Stored Procedures**: `sp_AddToWatchlist`, `sp_GetWatchHistory`, `sp_ProcessPayment`
+- **Flask** 3.0.0 - Web framework
 
-- **Functions**: `fn_GetSubscriptionStatus`, `fn_GetTotalWatchTime`- **Functions**: `fn_GetSubscriptionStatus`, `fn_GetTotalWatchTime`
+- **Flask-CORS** 5.0.0 - Cross-origin requests
+  
+- **MySQL Connector** 9.1.0 - Database driver
 
-- **Triggers**: `trg_CheckProfileLimit` (prevents >3 profiles per user)- **Triggers**: `trg_CheckProfileLimit` (prevents >3 profiles per user)
+- **PyJWT** 2.9.0 - JWT authentication
 
-
-
-------
-
-
-
-## 🛠️ Technology Stack## 🛠️ Technology Stack
-
-
-
-### Frontend### Frontend
-
-- **React** 19.2.0 - UI library- **React** 19.2.0 - UI library
-
-- **React Router** 7.0.2 - Navigation- **React Router** 7.0.2 - Navigation
-
-- **Axios** 1.6.2 - HTTP client- **Axios** 1.6.2 - HTTP client
-
-- **React Icons** 5.4.0 - Icon components- **React Icons** 5.4.0 - Icon components
-
-- **CSS3** - Styling- **CSS3** - Styling
-
-
-
-### Backend### Backend
-
-- **Flask** 3.0.0 - Web framework- **Flask** 3.0.0 - Web framework
-
-- **Flask-CORS** 5.0.0 - Cross-origin requests- **Flask-CORS** 5.0.0 - Cross-origin requests
-
-- **MySQL Connector** 9.1.0 - Database driver- **MySQL Connector** 9.1.0 - Database driver
-
-- **PyJWT** 2.9.0 - JWT authentication- **PyJWT** 2.9.0 - JWT authentication
-
-- **Bcrypt** 4.2.1 - Password hashing- **Bcrypt** 4.2.1 - Password hashing
+- **Bcrypt** 4.2.1 - Password hashing
 
 
 
 ### Database### Database
 
-- **MySQL** 8.0+ - Relational database- **MySQL** 8.0+ - Relational database
+- **MySQL** 8.0+ - Relational database
 
-- 13 tables with foreign key relationships- 13 tables with foreign key relationships
+- 13 tables with foreign key relationships
 
-- Stored procedures, functions, and triggers- Stored procedures, functions, and triggers
+- Stored procedures, functions, and triggers
 
 - **MySQL 8.0+**
 
@@ -976,6 +974,7 @@ This project was created for educational purposes as part of a Database Manageme
 
 ## 👥 Contributors
 
+- **mihirstag** - Project Developer
 - **mzw111** - Project Developer
 
 ---
@@ -1003,5 +1002,3 @@ This project was created for educational purposes as part of a Database Manageme
 - Verify MySQL user has TRIGGER privilege
 
 ---
-
-**Happy Streaming! 🎬🍿**
