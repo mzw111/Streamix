@@ -22,18 +22,27 @@ const Profiles = () => {
   const fetchProfiles = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await profileAPI.list();
-      setProfiles(response.data.profiles || []);
+      console.log('Profiles response:', response.data);
+      
+      if (response.data && response.data.profiles) {
+        setProfiles(response.data.profiles);
+      }
     } catch (err) {
+      console.error('Fetch profiles error:', err);
       setError('Failed to load profiles');
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSelectProfile = (profile) => {
-    // Store selected profile in localStorage
+    if (!profile || !profile.profile_id) {
+      console.error('Invalid profile selected');
+      return;
+    }
+    
     localStorage.setItem('selectedProfile', JSON.stringify(profile));
     localStorage.setItem('profileId', profile.profile_id);
     navigate('/');
@@ -42,12 +51,10 @@ const Profiles = () => {
   const handleCreateProfile = async (e) => {
     e.preventDefault();
     
-    if (!newProfileName.trim()) {
-      return;
-    }
+    const trimmedName = newProfileName.trim();
     
-    if (profiles.length >= 5) {
-      setError('Maximum 5 profiles allowed per account');
+    if (!trimmedName) {
+      setError('Profile name cannot be empty');
       return;
     }
     
@@ -55,16 +62,41 @@ const Profiles = () => {
     setError('');
     
     try {
-      const response = await profileAPI.create({ name: newProfileName.trim() });
-      const newProfile = response.data.profile;
-      setProfiles([...profiles, newProfile]);
-      setNewProfileName('');
-      setShowCreateModal(false);
+      console.log('Creating profile with name:', trimmedName);
       
-      // Auto-select the new profile
-      handleSelectProfile(newProfile);
+      const response = await profileAPI.create({ name: trimmedName });
+      console.log('Create response:', response);
+      
+      if (response.data && response.data.success) {
+        console.log('Profile created:', response.data.profile);
+        
+        // Close modal first
+        setShowCreateModal(false);
+        setNewProfileName('');
+        
+        // Then refresh profiles list
+        await fetchProfiles();
+        
+        // Clear any errors
+        setError('');
+      } else {
+        throw new Error(response.data?.message || 'Failed to create profile');
+      }
+      
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create profile');
+      console.error('Create profile error:', err);
+      
+      const errorMessage = err.response?.data?.message 
+        || err.message 
+        || 'Failed to create profile. Please try again.';
+      
+      setError(errorMessage);
+      
+      // Close modal and show error on main page if it's a limit error
+      if (errorMessage.includes('Maximum') || errorMessage.includes('limit') || errorMessage.includes('3')) {
+        setShowCreateModal(false);
+      }
+      
     } finally {
       setCreating(false);
     }
@@ -72,12 +104,37 @@ const Profiles = () => {
 
   const handleDeleteProfile = async (profileId) => {
     try {
-      await profileAPI.delete(profileId);
-      setProfiles(profiles.filter(p => p.profile_id !== profileId));
-      setDeleteConfirm(null);
       setError('');
+      await profileAPI.delete(profileId);
+      
+      // Refresh profiles after deletion
+      await fetchProfiles();
+      setDeleteConfirm(null);
+      
     } catch (err) {
+      console.error('Delete error:', err);
       setError(err.response?.data?.message || 'Failed to delete profile');
+    }
+  };
+
+  const openCreateModal = () => {
+    // Check if already at limit
+    if (profiles.length >= 3) {
+      setError('Maximum profile limit (3) reached. Please delete a profile to create a new one.');
+      return;
+    }
+    
+    // Otherwise open modal
+    setError('');
+    setNewProfileName('');
+    setShowCreateModal(true);
+  };
+
+  const closeCreateModal = () => {
+    if (!creating) {
+      setShowCreateModal(false);
+      setNewProfileName('');
+      setError('');
     }
   };
 
@@ -101,34 +158,47 @@ const Profiles = () => {
         </div>
         
         <div className="profiles-grid">
-          {profiles.map((profile) => (
-            <div 
-              key={profile.profile_id}
-              className={`profile-card ${manageMode ? 'manage-mode' : ''}`}
-              onClick={() => !manageMode && handleSelectProfile(profile)}
-            >
-              <div className="profile-avatar">
-                <FiUser />
-              </div>
-              <p className="profile-name">{profile.name}</p>
-              {manageMode && (
-                <button
-                  className="delete-profile-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirm(profile.profile_id);
-                  }}
+          {profiles && profiles.length > 0 ? (
+            profiles.map((profile) => {
+              if (!profile || !profile.profile_id) return null;
+              
+              return (
+                <div 
+                  key={profile.profile_id}
+                  className={`profile-card ${manageMode ? 'manage-mode' : ''}`}
+                  onClick={() => !manageMode && handleSelectProfile(profile)}
                 >
-                  <FiTrash2 />
-                </button>
-              )}
+                  <div className="profile-avatar">
+                    <FiUser />
+                  </div>
+                  <p className="profile-name">
+                    {profile.profile_name || profile.name || 'Profile'}
+                  </p>
+                  {manageMode && (
+                    <button
+                      className="delete-profile-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirm(profile.profile_id);
+                      }}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div style={{ color: 'white', gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>
+              <p>No profiles found. Create your first profile to get started!</p>
             </div>
-          ))}
+          )}
           
-          {profiles.length < 5 && !manageMode && (
+          {/* ALWAYS show Add Profile button, regardless of count */}
+          {!manageMode && (
             <div 
               className="profile-card add-profile"
-              onClick={() => setShowCreateModal(true)}
+              onClick={openCreateModal}
             >
               <div className="profile-avatar">
                 <FiPlus />
@@ -138,18 +208,24 @@ const Profiles = () => {
           )}
         </div>
         
-        <button 
-          className="btn btn-secondary manage-profiles-btn"
-          onClick={() => setManageMode(!manageMode)}
-        >
-          <FiEdit2 /> {manageMode ? 'Done' : 'Manage Profiles'}
-        </button>
+        {profiles.length > 0 && (
+          <button 
+            className="btn btn-secondary manage-profiles-btn"
+            onClick={() => {
+              setManageMode(!manageMode);
+              setError('');
+            }}
+          >
+            <FiEdit2 /> {manageMode ? 'Done' : 'Manage Profiles'}
+          </button>
+        )}
       </div>
       
       {showCreateModal && (
-        <div className="modal-overlay" onClick={() => !creating && setShowCreateModal(false)}>
+        <div className="modal-overlay" onClick={closeCreateModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Create Profile</h2>
+            {error && <p className="error-text" style={{marginBottom: '10px'}}>{error}</p>}
             <form onSubmit={handleCreateProfile}>
               <div className="form-group">
                 <label htmlFor="profileName">Profile Name</label>
@@ -162,6 +238,7 @@ const Profiles = () => {
                   disabled={creating}
                   maxLength={30}
                   autoFocus
+                  required
                 />
               </div>
               
@@ -169,7 +246,7 @@ const Profiles = () => {
                 <button 
                   type="button" 
                   className="btn btn-secondary"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={closeCreateModal}
                   disabled={creating}
                 >
                   Cancel
