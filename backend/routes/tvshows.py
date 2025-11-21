@@ -6,20 +6,25 @@ tvshows_bp = Blueprint("tvshows", __name__)
 # Map TV show titles to their actual TMDB poster URLs
 TVSHOW_POSTERS = {
     "Breaking Bad": "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
-    "Game of Thrones": "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
-    "Stranger Things": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg",
-    "The Crown": "https://image.tmdb.org/t/p/w500/1M876KPjulVwppEpldhdc8V4o68.jpg",
-    "The Mandalorian": "https://image.tmdb.org/t/p/w500/sWgBv7LV2PRoQgkxwlibdGXKz1S.jpg",
-    "The Witcher": "https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg",
-    "The Office": "https://image.tmdb.org/t/p/w500/qWnJzyZhyy74gjpSjIXWmuk0ifX.jpg",
-    "Friends": "https://image.tmdb.org/t/p/w500/f496cm9enuEsZkSPzCwnTESEK5s.jpg",
-    "Sherlock": "https://image.tmdb.org/t/p/w500/7WTsnHkbA0FaG6R9twfFde0I9hl.jpg",
-    "The Boys": "https://image.tmdb.org/t/p/w500/stTEycfG9928HYGEISBFaG1ngjM.jpg",
-    "Peaky Blinders": "https://image.tmdb.org/t/p/w500/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
-    "Dark": "https://image.tmdb.org/t/p/w500/3WR8kGGGmHVY0iE6RZZwskhk4GX.jpg",
-    "The Last of Us": "https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg",
     "Better Call Saul": "https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b7by.jpg",
-    "Westworld": "https://image.tmdb.org/t/p/w500/8MfgyFHf7XEboZJPZXCIDqqiz6e.jpg"
+    "The Crown": "https://image.tmdb.org/t/p/w500/1M876KPjulVwppEpldhdc8V4o68.jpg",
+    "Stranger Things": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg",
+    "Black Mirror": "https://image.tmdb.org/t/p/w500/5UaYsGZOFhjFDwQh6GuLjjA1WlF.jpg",
+    "Westworld": "https://image.tmdb.org/t/p/w500/8MfgyFHf7XEboZJPZXCIDqqiz6e.jpg",
+    "Narcos": "https://image.tmdb.org/t/p/w500/rTmal9fDbwh5F0waol2hq35U4ah.jpg",
+    "Peaky Blinders": "https://image.tmdb.org/t/p/w500/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
+    "Ozark": "https://image.tmdb.org/t/p/w500/m73VMp0W5Z3Qn0VY5zyQ8FgJwmV.jpg",
+    "The Office": "https://image.tmdb.org/t/p/w500/qWnJzyZhyy74gjpSjIXWmuk0ifX.jpg",
+    "Brooklyn Nine-Nine": "https://image.tmdb.org/t/p/w500/hgRMSOt7a1b8qyQR68vUixJPang.jpg",
+    "Parks and Recreation": "https://image.tmdb.org/t/p/w500/dDuzrl9rUIBYieZjqmtbJc2hPqK.jpg",
+    "Mindhunter": "https://image.tmdb.org/t/p/w500/oKt4J3TFjWirVwBqoHyIvv5IImd.jpg",
+    "True Detective": "https://image.tmdb.org/t/p/w500/cuV2O5ZyDLHSOWzg3XNBvH3hNI.jpg",
+    "Game of Thrones": "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
+    "The Witcher": "https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg",
+    "The Boys": "https://image.tmdb.org/t/p/w500/stTEycfG9928HYGEISBFaG1ngjM.jpg",
+    "Jack Ryan": "https://image.tmdb.org/t/p/w500/6ovk8nrrSmN1ieT44D7Foable72.jpg",
+    "The Haunting of Hill House": "https://image.tmdb.org/t/p/w500/38PkhBGRQtmVx2drvPik3F42qHO.jpg",
+    "The Walking Dead": "https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg"
 }
 
 def transform_tvshow(show):

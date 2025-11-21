@@ -15,7 +15,7 @@ DB_CONFIG = {
 try:
     connection_pool = pooling.MySQLConnectionPool(
         pool_name="streaming_pool",
-        pool_size=5,
+        pool_size=30,
         pool_reset_session=True,
         **DB_CONFIG
     )

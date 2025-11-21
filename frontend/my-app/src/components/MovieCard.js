@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiPlay, FiPlus, FiCheck, FiInfo, FiStar } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { watchlistAPI, ratingsAPI, viewingHistoryAPI } from '../services/api';
 import RatingModal from './RatingModal';
 import './MovieCard.css';
 
-const MovieCard = ({ content, type = 'Movie', profileId }) => {
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
+const MovieCard = ({ content, type = 'Movie', profileId, isFromWatchlist = false }) => {
+  const [isInWatchlist, setIsInWatchlist] = useState(isFromWatchlist);
   const [isHovered, setIsHovered] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
+
+  // Update watchlist state when prop changes
+  useEffect(() => {
+    setIsInWatchlist(isFromWatchlist);
+  }, [isFromWatchlist]);
 
   // Safety check
   if (!content) {
@@ -61,25 +66,8 @@ const MovieCard = ({ content, type = 'Movie', profileId }) => {
   };
 
   const handleClick = async () => {
-    // Log viewing history when clicking on content
-    if (profileId && contentId) {
-      try {
-        const historyData = {
-          profile_id: parseInt(profileId),
-          content_type: type === 'TV_Show' ? 'TV_Show' : 'Movie',
-          content_id: parseInt(contentId),
-          watch_duration: 120 // Set to 120 minutes as default watch duration
-        };
-        console.log('Logging viewing history:', historyData);
-        const response = await viewingHistoryAPI.log(historyData);
-        console.log('✅ Viewing history logged successfully:', response.data);
-      } catch (error) {
-        console.error('❌ Failed to log viewing history:', error);
-        console.error('Error response:', error.response?.data);
-        // Don't block navigation if logging fails
-      }
-    }
-    navigate(`/${type.toLowerCase()}/${contentId}`);
+    // Navigate to movie detail page instead of logging immediately
+    navigate(`/movie/${contentId}`);
   };
 
   const handleRatingSubmit = async (ratingData) => {

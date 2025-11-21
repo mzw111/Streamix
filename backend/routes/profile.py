@@ -27,16 +27,32 @@ def create_profile(current_user):
     language_pref = data.get("language", "English")
     age_restriction = data.get("age_restriction", "All")
 
-    query = """
-        INSERT INTO profile (User_Id, Profile_Name, Profile_Picture, Language_Preference, Age_Restriction)
-        VALUES (%s, %s, %s, %s, %s)
-    """
-    result = execute_query(query, (current_user, profile_name, profile_picture, language_pref, age_restriction))
-    
-    # Get the newly created profile
-    new_profile = fetch_one("SELECT * FROM profile WHERE Profile_Id = LAST_INSERT_ID()")
-    
-    return jsonify({"success": True, "message": "Profile created successfully!", "profile": transform_profile(new_profile)})
+    if not profile_name:
+        return jsonify({"success": False, "message": "Profile name is required"}), 400
+
+    try:
+        query = """
+            INSERT INTO profile (User_Id, Profile_Name, Profile_Picture, Language_Preference, Age_Restriction)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        execute_query(query, (current_user, profile_name, profile_picture, language_pref, age_restriction))
+        
+        # Get the newly created profile by user_id and profile_name
+        new_profile = fetch_one(
+            "SELECT * FROM profile WHERE User_Id = %s AND Profile_Name = %s ORDER BY Profile_Id DESC LIMIT 1",
+            (current_user, profile_name)
+        )
+        
+        if not new_profile:
+            return jsonify({"success": False, "message": "Profile created but could not retrieve"}), 500
+        
+        return jsonify({"success": True, "message": "Profile created successfully!", "profile": transform_profile(new_profile)})
+    except Exception as e:
+        error_msg = str(e)
+        # Check if it's the trigger error
+        if "Maximum profile limit" in error_msg:
+            return jsonify({"success": False, "message": "Maximum profile limit (3) reached for this user."}), 400
+        return jsonify({"success": False, "message": f"Failed to create profile: {error_msg}"}), 500
 
 
 @profile_bp.route("/list", methods=["GET"])

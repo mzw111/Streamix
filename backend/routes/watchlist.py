@@ -103,7 +103,27 @@ def get_watchlist(current_user, profile_id):
                CASE 
                    WHEN w.Content_Type = 'Movie' THEN m.Title
                    WHEN w.Content_Type = 'TV_Show' THEN t.Title
-               END AS Title
+               END AS Title,
+               CASE 
+                   WHEN w.Content_Type = 'Movie' THEN m.Movie_Id
+                   ELSE NULL
+               END AS Movie_Id,
+               CASE 
+                   WHEN w.Content_Type = 'TV_Show' THEN t.Show_Id
+                   ELSE NULL
+               END AS Show_Id,
+               CASE 
+                   WHEN w.Content_Type = 'Movie' THEN m.average_rating
+                   WHEN w.Content_Type = 'TV_Show' THEN t.average_rating
+               END AS average_rating,
+               CASE 
+                   WHEN w.Content_Type = 'Movie' THEN m.Release_Date
+                   ELSE NULL
+               END AS Release_Date,
+               CASE 
+                   WHEN w.Content_Type = 'Movie' THEN m.Duration
+                   ELSE NULL
+               END AS Duration
         FROM watchlist w
         LEFT JOIN movie m ON w.Content_Type = 'Movie' AND w.Content_Id = m.Movie_Id
         LEFT JOIN tv_show t ON w.Content_Type = 'TV_Show' AND w.Content_Id = t.Show_Id
@@ -111,5 +131,18 @@ def get_watchlist(current_user, profile_id):
         ORDER BY w.Date_Added DESC
     """
     results = fetch_query(query, (profile_id,))
-    return jsonify({"success": True, "watchlist": [transform_watchlist_item(r) for r in results]})
+    transformed = []
+    for r in results:
+        item = transform_watchlist_item(r)
+        # Add movie_id or tv_show_id for frontend
+        if r.get("Movie_Id"):
+            item["movie_id"] = r.get("Movie_Id")
+            item["average_rating"] = float(r.get("average_rating", 0)) if r.get("average_rating") else 0
+            item["release_year"] = r.get("Release_Date").year if r.get("Release_Date") else None
+            item["duration"] = r.get("Duration")
+        elif r.get("Show_Id"):
+            item["tv_show_id"] = r.get("Show_Id")
+            item["average_rating"] = float(r.get("average_rating", 0)) if r.get("average_rating") else 0
+        transformed.append(item)
+    return jsonify({"success": True, "watchlist": transformed})
 

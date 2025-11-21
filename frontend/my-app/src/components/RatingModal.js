@@ -43,7 +43,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit, contentTitle, currentRating = 
         <form onSubmit={handleSubmit}>
           <div className="rating-stars-container">
             <div className="rating-stars">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+              {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   type="button"
@@ -57,7 +57,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit, contentTitle, currentRating = 
               ))}
             </div>
             <p className="rating-value">
-              {hoverRating || rating ? `${hoverRating || rating}/10` : 'Select a rating'}
+              {hoverRating || rating ? `${hoverRating || rating}/5` : 'Select a rating'}
             </p>
           </div>
 

@@ -114,6 +114,7 @@ const Watchlist = () => {
                     content={item}
                     type={isMovie ? 'Movie' : 'TV_Show'}
                     profileId={localStorage.getItem('profileId')}
+                    isFromWatchlist={true}
                   />
                 );
               })}

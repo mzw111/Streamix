@@ -1,13 +1,7 @@
--- ============================================
--- STREAMIX DATABASE OBJECTS
--- Stored Procedures, Triggers, and Functions
--- ============================================
 
 USE streamingdb;
-
--- ============================================
--- 1. STORED PROCEDURE: Add to Watchlist
--- ============================================
+-- procedures
+-- added to watchlist
 DROP PROCEDURE IF EXISTS sp_AddToWatchlist;
 
 DELIMITER //
@@ -19,14 +13,13 @@ CREATE PROCEDURE sp_AddToWatchlist(
 BEGIN
     DECLARE v_exists INT;
     
-    -- Check if item already exists in watchlist
+    
     SELECT COUNT(*) INTO v_exists
     FROM watchlist
     WHERE Profile_Id = p_profile_id 
     AND Content_Type = p_content_type 
     AND Content_Id = p_content_id;
-    
-    -- Only insert if not already in watchlist
+   
     IF v_exists = 0 THEN
         INSERT INTO watchlist (Profile_Id, Content_Type, Content_Id, Date_Added)
         VALUES (p_profile_id, p_content_type, p_content_id, CURDATE());
@@ -34,9 +27,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- ============================================
--- 2. STORED PROCEDURE: Remove from Watchlist
--- ============================================
+--removed from watchlist
 DROP PROCEDURE IF EXISTS sp_RemoveFromWatchlist;
 
 DELIMITER //
@@ -53,9 +44,8 @@ BEGIN
 END //
 DELIMITER ;
 
--- ============================================
--- 3. STORED PROCEDURE: Get User Watch History
--- ============================================
+
+--user history
 DROP PROCEDURE IF EXISTS sp_GetWatchHistory;
 
 DELIMITER //
@@ -80,9 +70,8 @@ BEGIN
 END //
 DELIMITER ;
 
--- ============================================
--- 4. FUNCTION: Get User's Subscription Status
--- ============================================
+-- functions
+--- subscription status
 DROP FUNCTION IF EXISTS fn_GetSubscriptionStatus;
 
 DELIMITER //
@@ -108,9 +97,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- ============================================
--- 5. FUNCTION: Calculate Total Watch Time
--- ============================================
+-- watch time
 DROP FUNCTION IF EXISTS fn_GetTotalWatchTime;
 
 DELIMITER //
@@ -120,6 +107,7 @@ DETERMINISTIC
 READS SQL DATA
 BEGIN
     DECLARE v_total_time INT DEFAULT 0;
+    
     
     SELECT COALESCE(SUM(
         CASE 
@@ -135,9 +123,8 @@ BEGIN
 END //
 DELIMITER ;
 
--- ============================================
--- 6. TRIGGER: Update Average Rating on Movie
--- ============================================
+-- triggers
+-- update movie rating avg
 DROP TRIGGER IF EXISTS trg_UpdateMovieRating;
 
 DELIMITER //
@@ -157,9 +144,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- ============================================
--- 7. TRIGGER: Update Average Rating on TV Show
--- ============================================
+-- update tv rating avg
 DROP TRIGGER IF EXISTS trg_UpdateTVShowRating;
 
 DELIMITER //
@@ -179,9 +164,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- ============================================
--- 8. TRIGGER: Log Viewing History
--- ============================================
+--log viewing history
 DROP TRIGGER IF EXISTS trg_LogViewingHistory;
 
 DELIMITER //
@@ -189,94 +172,38 @@ CREATE TRIGGER trg_LogViewingHistory
 AFTER INSERT ON viewing_history
 FOR EACH ROW
 BEGIN
-    -- This trigger can be used to perform additional actions
-    -- For example, updating user statistics or recommendations
-    -- Currently acts as a logging point for future enhancements
+   
     SELECT CONCAT('View logged for Profile ', NEW.Profile_Id) AS log_message;
 END //
 DELIMITER ;
 
--- ============================================
--- 9. STORED PROCEDURE: Get Content Recommendations
--- ============================================
-DROP PROCEDURE IF EXISTS sp_GetRecommendations;
+
+--  (max 3 profiles per user)
+DROP TRIGGER IF EXISTS trg_CheckProfileLimit;
 
 DELIMITER //
-CREATE PROCEDURE sp_GetRecommendations(
-    IN p_profile_id INT,
-    IN p_limit INT
-)
+CREATE TRIGGER trg_CheckProfileLimit
+BEFORE INSERT ON profile
+FOR EACH ROW
 BEGIN
-    -- Get recommendations based on viewing history and ratings
-    SELECT DISTINCT 
-        'Movie' AS content_type,
-        m.Movie_Id AS content_id,
-        m.Title,
-        m.average_rating,
-        m.Release_Date
-    FROM movie m
-    INNER JOIN movie_genre mg ON m.Movie_Id = mg.Movie_Id
-    WHERE mg.Genre_Id IN (
-        -- Get genres from user's viewing history
-        SELECT DISTINCT mg2.Genre_Id
-        FROM viewing_history vh
-        INNER JOIN movie_genre mg2 ON vh.Content_Id = mg2.Movie_Id
-        WHERE vh.Profile_Id = p_profile_id 
-        AND vh.Content_Type = 'Movie'
-    )
-    AND m.Movie_Id NOT IN (
-        -- Exclude already watched movies
-        SELECT Content_Id FROM viewing_history 
-        WHERE Profile_Id = p_profile_id AND Content_Type = 'Movie'
-    )
-    ORDER BY m.average_rating DESC
-    LIMIT p_limit;
+    DECLARE existing_profile_count INT;
+    
+    -- Count existing profiles for this user
+    SELECT COUNT(*) 
+    INTO existing_profile_count 
+    FROM profile 
+    WHERE User_Id = NEW.User_Id;
+    
+    
+    IF existing_profile_count >= 3 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error: Maximum profile limit (3) reached for this user.';
+    END IF;
 END //
 DELIMITER ;
 
--- ============================================
--- 10. STORED PROCEDURE: Process Payment
--- ============================================
-DROP PROCEDURE IF EXISTS sp_ProcessPayment;
 
-DELIMITER //
-CREATE PROCEDURE sp_ProcessPayment(
-    IN p_user_id INT,
-    IN p_plan_id INT,
-    IN p_amount DECIMAL(10,2),
-    IN p_payment_method VARCHAR(50)
-)
-BEGIN
-    DECLARE v_payment_id INT;
-    DECLARE v_end_date DATE;
-    
-    -- Calculate subscription end date (30 days from now)
-    SET v_end_date = DATE_ADD(CURDATE(), INTERVAL 30 DAY);
-    
-    -- Insert payment record
-    INSERT INTO payment (User_Id, Amount, Payment_Date, Payment_Method, Status)
-    VALUES (p_user_id, p_amount, NOW(), p_payment_method, 'Completed');
-    
-    SET v_payment_id = LAST_INSERT_ID();
-    
-    -- Update or create subscription
-    INSERT INTO subscription (User_Id, Plan_Id, Start_Date, End_Date, Status, Payment_Id)
-    VALUES (p_user_id, p_plan_id, CURDATE(), v_end_date, 'Active', v_payment_id)
-    ON DUPLICATE KEY UPDATE
-        Plan_Id = p_plan_id,
-        End_Date = v_end_date,
-        Status = 'Active',
-        Payment_Id = v_payment_id;
-        
-    SELECT 'Payment processed successfully' AS message, v_payment_id AS payment_id;
-END //
-DELIMITER ;
 
--- ============================================
--- Test the database objects
--- ============================================
-
--- Test subscription function
 SELECT fn_GetSubscriptionStatus(1) AS subscription_status;
 
 -- Show all created procedures
